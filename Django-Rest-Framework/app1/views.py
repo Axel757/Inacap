@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from app1.models import *
 from app1.serializers import * 
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, generics, mixins, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from django.http import Http404
@@ -17,6 +17,8 @@ def employeeView(request):
     
     return JsonResponse(emp)
 
+
+#FUNCTION BASED VIEWS =================================================
 
 # @api_view(['GET', 'POST'])
 # def student_list(request):
@@ -54,41 +56,82 @@ def employeeView(request):
 #             return Response(serializer.data)
 #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+# =================================================================    
     
-class StudentList(APIView):
-        def get(self, request):
-            students = Student.objects.all()
-            serializers = StudentSerializer(students, many=True)
-            return Response(serializers.data)
-        
-        def post(self, request):
-            serializers = StudentSerializer(data = request.data)
-            if serializers.is_valid():
-                serializers.save()
-                return Response(serializers.data, status=status.HTTP_201_CREATED)
-            return Response(serializers.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+#CLASS BASED VIEWS =================================    
 
-class StudentDetail(APIView):
-        def get_object(self, pk):
-            try:
-                return Student.objects.get(pk=pk)    
-            except Student.DoesNotExist:
-                return Http404
+# class StudentList(APIView):
+#         def get(self, request):
+#             students = Student.objects.all()
+#             serializers = StudentSerializer(students, many=True)
+#             return Response(serializers.data)
         
-        def get(self, request, pk):
-            student = self.get_object(pk)
-            serializers = StudentSerializer(student)
-            return Response(serializers.data)            
+#         def post(self, request):
+#             serializers = StudentSerializer(data = request.data)
+#             if serializers.is_valid():
+#                 serializers.save()
+#                 return Response(serializers.data, status=status.HTTP_201_CREATED)
+#             return Response(serializers.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# class StudentDetail(APIView):
+#         def get_object(self, pk):
+#             try:
+#                 return Student.objects.get(pk=pk)    
+#             except Student.DoesNotExist:
+#                 return Http404
         
-        def put(self, request, pk):
-            student = self.get_object(pk)
-            serializers = StudentSerializer(student, data=request.data)
-            if serializers.is_valid():
-                serializers.save()
-                return Response(serializers.data)
-            return Response(serializers.errors, status=status.HTTP_400_BAD_REQUEST)      
+#         def get(self, request, pk):
+#             student = self.get_object(pk)
+#             serializers = StudentSerializer(student)
+#             return Response(serializers.data)            
         
-        def delete(self, request, pk):
-            student = self.get_object(pk)
-            student.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+#         def put(self, request, pk):
+#             student = self.get_object(pk)
+#             serializers = StudentSerializer(student, data=request.data)
+#             if serializers.is_valid():
+#                 serializers.save()
+#                 return Response(serializers.data)
+#             return Response(serializers.errors, status=status.HTTP_400_BAD_REQUEST)      
+        
+#         def delete(self, request, pk):
+#             student = self.get_object(pk)
+#             student.delete()
+#             return Response(status=status.HTTP_204_NO_CONTENT)
+
+# =================================================================
+
+# MIXINS =================================
+
+# class StudentList(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
+#     queryset = Student.objects.all()
+#     serializer_class = StudentSerializer
+    
+#     def get (self, request):
+#         return self.list(request)
+    
+#     def post(self, request):
+#         return self.create(request)
+
+# class StudentDetail(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, generics.GenericAPIView):
+#     queryset = Student.objects.all()
+#     serializer_class = StudentSerializer    
+   
+#     def get(self, request, pk):
+#         return self.retrieve(request, pk)
+        
+#     def put(self, request, pk):
+#         return self.update(request, pk)        
+        
+#     def delete(self, request, pk):
+#         return self.destroy(request, pk)
+
+# ==========================================
+
+
+
+#VIEWS SETS =================================
+
+class StudentViewSets(viewsets.ModelViewSet ):
+    queryset = Student.objects.all()
+    serializer_class = StudentSerializer

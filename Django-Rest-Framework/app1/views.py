@@ -5,6 +5,8 @@ from app1.serializers import *
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
+from rest_framework.views import APIView
+from django.http import Http404
 # Create your views here.
 def employeeView(request):
     empleados = Employee.objects.all()
@@ -20,11 +22,11 @@ def employeeView(request):
 def student_list(request):
     if request.method == 'GET':
         students = Student.objects.all()
-        serializer = StudenSerializer(students, many=True)
+        serializer = StudentSerializer(students, many=True)
         return Response(serializer.data)
     
     if request.method == 'POST':
-        serializer = StudenSerializer(data = request.data)
+        serializer = StudentSerializer(data = request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -38,7 +40,7 @@ def student_detail(request, pk):
         return Response(status=status.HTTP_404_NOT_FOUND)
     
     if request.method == 'GET':
-       serializer = StudenSerializer(student)
+       serializer = StudentSerializer(student)
        return Response(serializer.data)
 
     if request.method == 'DELETE':
@@ -46,9 +48,23 @@ def student_detail(request, pk):
        return Response(status=status.HTTP_204_NO_CONTENT)   
    
     if request.method == 'PUT':
-        serializer = StudenSerializer(student, data=request.data)
+        serializer = StudentSerializer(student, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+class StudentList(APIView):
+        def get(self, request):
+            students = Student.objects.all()
+            serializers = StudentSerializer(students, many=True)
+            return Response(serializers.data)
+        
+        def post(self, request):
+            serializers = StudentSerializer(data = request.data)
+            if serializers.is_valid():
+                serializers.save()
+                return Response(serializers.data, status=status.HTTP_201_CREATED)
+            return Response(serializers.errors, status=status.HTTP_400_BAD_REQUEST)
     
